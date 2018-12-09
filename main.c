@@ -172,16 +172,16 @@ void showHelp(){
 	printf("/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*\n");
 	printf("/*/*/*/*/*/*/*GameCoin/*/*/*/*/*/*/*\n");
 	printf("/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*\n\n\n");
-	printf("Hra sa ovlada pomocou A a S. \nPrincip hry spociva v zbierani minci.");
+	printf("Gamae is controlled by A and S. \nYou have to gain as much coins as possible.");
 	instuff = true;
 }
 
 void showStats(){
 	clearScreen();
 	printf("------------------------------------\n");
-	printf("-------------Statistika-------------\n");
+	printf("----------------Stats---------------\n");
 	printf("------------------------------------\n\n\n");
-	printf("Pocet nazbieranych minci: %d", getData());
+	printf("Number of collected coins: %d", getData());
 	instuff = true;
 }
 
