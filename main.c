@@ -1,9 +1,13 @@
 #include <stdio.h>
-#include <conio.h>
 #include <stdlib.h>
 #include <stdbool.h>
-#include <windows.h>
+#include <sys/ioctl.h>
+#include <termios.h>
 #include <time.h>
+
+#include <sys/select.h>
+#include <termios.h>
+#include <unistd.h>
 
 #define WIDTH		79
 #define HEIGHT		24
@@ -35,6 +39,8 @@ void enemy();
 void clearScreen();
 void saveData(int coins);
 int getData();
+int kbhit();
+int getch();
 
 char menu[4][7] = 
 {
@@ -65,7 +71,7 @@ int main(int argc, char *argv[]) {
 	while(1)
 	{
 		if(kbhit()) key_control(getch());
-		Sleep(50 - (coins * 5) > 10 ? 50 - (coins * 5) : 10);
+		sleep(50 - (coins * 5) > 10 ? 50/1000 - (coins * 5)/1000 : 10/1000);
 		if(ingame){
 			showScore();
 			enemy();
@@ -147,14 +153,9 @@ void menuSelecting(){
 	initialize();
 }
 
-void gotoxy(int column, int line){
-  COORD coord;
-  coord.X = column;
-  coord.Y = line;
-  SetConsoleCursorPosition(
-    GetStdHandle( STD_OUTPUT_HANDLE ),
-    coord
-    );
+void gotoxy(int x,int y)
+{
+ 	printf("%c[%d;%df",0x1B,y,x);
 }
 
 void clearScreen(){
@@ -247,4 +248,51 @@ int getData(){
 	fclose(fp);
 	
 	return tmp;
+}
+
+int kbhit() {
+    static const int STDIN = 0;
+    static short initialized = 0;
+    static struct termios term;
+    static struct termios original;
+    
+    
+    if (! initialized) {
+        // Use termios to turn off line buffering
+        tcgetattr(STDIN, &term);
+        tcgetattr(STDIN, &original);
+        
+        term.c_lflag &= ~(ICANON | ECHO);
+        tcsetattr(STDIN, TCSANOW, &term);
+        
+        setbuf(stdin, NULL);
+        initialized = 1;
+    }
+    
+    int bytesWaiting;
+    ioctl(STDIN, FIONREAD, &bytesWaiting);
+    
+    if (bytesWaiting) {
+        tcsetattr(STDIN, TCSANOW, &original);
+        return bytesWaiting;
+    }
+    
+    return bytesWaiting;
+}
+
+int getch() {
+	static struct termios mySettings, original;
+	char input;
+
+	tcgetattr(STDIN_FILENO, &original);
+	mySettings = original;
+
+	mySettings.c_lflag &= ~(ICANON | ECHO);
+	tcsetattr(STDIN_FILENO, TCSANOW, &mySettings);
+
+	input = getchar();
+
+	tcsetattr(STDIN_FILENO, TCSANOW, &original);
+
+	return input;
 }
